@@ -1,0 +1,91 @@
+<div data-name="all" class="page">
+  <div class="navbar">
+    <div class="navbar-inner">
+      <div class="title">
+        Organiser - Home
+      </div>
+    </div>
+  </div>
+  
+  <div class="page-content">
+    
+    <div class="list media-list chevron-center">
+      <ul id="entries">
+        <li><div class="preloader"></div></li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="fab fab-right-bottom">
+    <a href="#" class="popup-open" data-popup=".popup-new"><i class="material-icons">add</i></a>
+  </div>
+  
+  <!--new popup-->
+  <div class="popup popup-new theme-dark">
+    <div class="page">
+      <div class="navbar">
+        <div class="navbar-inner">
+          <div class="left">
+            <a href="#" class="link popup-close"><i class="material-icons">arrow_back_ios</i>Cancel</a>
+          </div>
+          <div class="title">
+            Add new
+          </div>
+        </div>
+      </div>
+      
+      <div class="page-content">
+        <div class="list">
+          <ul>
+
+            <li class="item-content item-input">
+              <div class="item-media"><i class="material-icons">edit</i></div>
+              <div class="item-inner">
+                <div class="item-input-wrap">
+                  <input type="text" name="title" placeholder="Title">
+                </div>
+              </div>
+            </li>
+
+            <li class="item-content item-input">
+              <div class="item-media"><i class="material-icons">calendar_today</i></div>
+              <div class="item-inner">
+                <div class="item-input-wrap">
+                  <input type="date" placeholder="Date" name="date" id="date">
+                </div>
+              </div>
+            </li>
+
+            <li class="item-content item-input">
+              <div class="item-media"><i class="material-icons">notes</i></div>
+              <div class="item-inner">
+                <div class="item-input-wrap">
+                  <textarea class="resizable" name="notes" placeholder="Notes"></textarea>
+                </div>
+              </div>
+            </li>
+            
+            <li class="item-content item-input">
+              <div class="item-media"><i class="material-icons">notifications</i></div>
+              <div class="item-inner">
+                <div class="item-input-wrap">
+                  <input type="date" placeholder="Date" name="notDate" id="notDate">
+                </div>
+              </div>
+            </li>
+            
+            <li class="item-content item-input">
+              <div class="item-inner">
+                <button class="button button-fill" onclick="addNew()">
+                  Add
+                </button>
+              </div>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
