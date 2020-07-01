@@ -58,13 +58,30 @@ app.all('*', (req, res, next) => {
   if (req.cookies.token == process.env.ACCESS_TOKEN) {
     next()
   } else {
-    res.sendFile(__dirname + '/views/login.html')
+    let file = fs.readFileSync(__dirname + '/views/login.html').toString()
+    file = file.replace(/TITLE/g, process.env.TITLE)
+    response.write(file);
+    response.end()
   }
 })
 
 //send app page
 app.get('/', function(request, response) {
-  response.sendFile(__dirname + '/views/app.html');
+  let file = fs.readFileSync(__dirname + '/views/app.html').toString()
+  file = file.replace(/TITLE/g, process.env.TITLE)
+  file = file.replace(/COLOUR/g, process.env.COLOUR)
+  response.writeHead(200, {'Content-Type': 'text/html'});
+  response.write(file);
+  response.end()
+});
+
+// Send HTML page for all entries
+app.get('/all.html', (req, res) => {
+  let file = fs.readFileSync(__dirname + '/views/all.html').toString()
+  file = file.replace(/TITLE/g, "TEST")
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write(file);
+  res.end()
 });
 
 //send all entries
@@ -131,7 +148,7 @@ let sendNotification = function(entries) {
   let data = {
     fromAddress: "reminder@mail.alexclifton.co.uk",
     toAddress: process.env.NOTIFICATIONADDRESS,
-    subject: "Organiser Reminders - Work",
+    subject: "Organiser Reminders - " + process.env.TITLE,
     mailFormat: "html",
     content: generateEmail(entries),
     key: process.env.EMAILKEY
@@ -155,7 +172,7 @@ let markAsSent = function(ids) {
 
 // Makes a string for sending data in email
 let generateEmail = function(data) {
-  let email = "<h1>Organiser reminders - Work</h1>"
+  let email = `<h1>Organiser reminders - ${process.env.TITLE}</h1>`
   email += `<p>Upcoming reminders: <b>${data.length}</b></p>`
   
   let ids = []
