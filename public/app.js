@@ -42,7 +42,13 @@ let loadPage = function(page) {
           //loop through all entries
           for (let i in window.entries) {
             let entry = window.entries[i]
-            let date = dateFormat(new Date(entry.date), "dddd, dS mmmm, yyyy")
+            // If clear was pressed when selecting the date on iOS, it will be invalid here
+            let date;
+            try {
+                date = dateFormat(new Date(entry.date), "dddd, dS mmmm, yyyy")
+            } catch (err) {
+                date = "&nbsp"
+            }
             html += `<li><a href="/entry/${entry.id}/" class="item-link item-content">` + 
               `<div class="item-inner"><div class="item-title-row"><div class="item-title">${entry.title}\</div></div>` +
               `<div class="item-subtitle">${date}\</div></div</a></li>`
