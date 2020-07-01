@@ -60,8 +60,8 @@ app.all('*', (req, res, next) => {
   } else {
     let file = fs.readFileSync(__dirname + '/views/login.html').toString()
     file = file.replace(/TITLE/g, process.env.TITLE)
-    response.write(file);
-    response.end()
+    res.write(file);
+    res.end()
   }
 })
 
