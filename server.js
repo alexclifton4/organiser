@@ -78,7 +78,7 @@ app.get('/', function(request, response) {
 // Send HTML page for all entries
 app.get('/all.html', (req, res) => {
   let file = fs.readFileSync(__dirname + '/views/all.html').toString()
-  file = file.replace(/TITLE/g, "TEST")
+  file = file.replace(/TITLE/g, process.env.TITLE)
   res.writeHead(200, {'Content-Type': 'text/html'});
   res.write(file);
   res.end()
