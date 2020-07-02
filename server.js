@@ -111,8 +111,8 @@ app.get('/entry', (req, res) => {
 app.post('/addNew', (req, res) => {
   //insert into db
   let db = database.connect()
-  let sql = "INSERT INTO entries (title, date, notes, notificationDate, notificationSent) VALUES ($1, $2, $3, $4, 0)";
-  db.query(sql, [req.body.title, req.body.date, req.body.notes, req.body.notDate], (err) => {
+  let sql = "INSERT INTO entries (title, date, notes, phone, cost, payment, company, notificationDate, notificationSent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0)";
+  db.query(sql, [req.body.title, req.body.date, req.body.notes, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notDate], (err) => {
     if (err) throw err
     res.send("done")
     db.end()
@@ -123,8 +123,9 @@ app.post('/addNew', (req, res) => {
 app.post('/save', (req, res) => {
   //update db
   let db = database.connect()
-  let sql = "UPDATE entries SET title = $1, date = $2, notes = $3, notificationDate = $4, notificationSent = 0 WHERE rowid = $5"
-  db.query(sql, [req.body.title, req.body.date, req.body.notes, req.body.notDate, req.body.id], (err) => {
+  //title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company
+  let sql = "UPDATE entries SET title = $1, date = $2, phone = $3, cost = $4, payment = $5, company = $6, notes = $7, notificationDate = $8, notificationSent = 0 WHERE rowid = $9"
+  db.query(sql, [req.body.title, req.body.date, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notes, req.body.notDate, req.body.id], (err) => {
     if (err) throw err
     res.send("done");
     db.end()

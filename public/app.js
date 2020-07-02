@@ -1,10 +1,5 @@
 /* globals Framework7, axios, dateFormat*/
 
-const fobStatus = ["Send Fob", "Fob Sent", "Fob Received"]
-let fobValue = 0;
-const depositStatus = ["Waiting Deposit", "Deposit Received", "Deposit Returned"]
-let depositValue = 0;
-
 var app = new Framework7({
   theme: "md",
   routes: [
@@ -71,6 +66,11 @@ let loadPage = function(page) {
         document.getElementsByName("entryTitle")[1].value = response.data.title
         document.getElementsByName("entryDate")[0].value = dateFormat(response.data.date, "isoDate")
         document.getElementsByName("entryNotes")[0].innerHTML = response.data.notes
+        document.getElementsByName("entryPhone")[0].value = response.data.phone
+        document.getElementsByName("entryCost")[0].value =  parseFloat(response.data.cost.substr(1))
+        console.log(response.data.cost)
+        document.getElementsByName("entryPayment")[0].value = response.data.payment
+        document.getElementsByName("entryCompany")[0].value = response.data.company
         if (response.data.notificationdate) {
           document.getElementsByName("entryNotDate")[0].value = dateFormat(response.data.notificationdate, "isoDate")
         }
@@ -91,6 +91,10 @@ let addNew = function() {
   let date = document.getElementsByName("date")[0].value;
   let notes = document.getElementsByName("notes")[0].value;
   let notDate = document.getElementsByName("notDate")[0].value;
+  let phone = document.getElementsByName("phone")[0].value;
+  let cost = document.getElementsByName("cost")[0].value;
+  let payment = document.getElementsByName("payment")[0].value;
+  let company = document.getElementsByName("company")[0].value;
   
   //validate title
   if (title == "") {
@@ -99,13 +103,17 @@ let addNew = function() {
   }
   
   //send to server
-  axios.post("/addNew", {title: title, date: date, notes: notes, notDate: notDate}).then((response) => {
+  axios.post("/addNew", {title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
     // Refresh the page
     loadPage({path: "/all/"})
     
     //clear input fields
     document.getElementsByName("title")[0].value = ""
     document.getElementsByName("notes")[0].value = ""
+    document.getElementsByName("phone")[0].value = ""
+    document.getElementsByName("cost")[0].value = ""
+    document.getElementsByName("payment")[0].value = ""
+    document.getElementsByName("company")[0].value = ""
     
     app.popup.close()
   })
@@ -113,10 +121,14 @@ let addNew = function() {
 
 //save edits
 let save = function() {
-  let title = document.getElementsByName("entryTitle")[1].value;
+  let title = document.getElementsByName("entryTitle")[1].value; // There are 2 divs with this name
   let date = document.getElementsByName("entryDate")[0].value;
-  let notDate = document.getElementsByName("entryNotDate")[0].value;
   let notes = document.getElementsByName("entryNotes")[0].value;
+  let notDate = document.getElementsByName("entryNotDate")[0].value;
+  let phone = document.getElementsByName("entryPhone")[0].value;
+  let cost = document.getElementsByName("entryCost")[0].value;
+  let payment = document.getElementsByName("entryPayment")[0].value;
+  let company = document.getElementsByName("entryCompany")[0].value;
   
   //validate title
   if (title == "") {
@@ -125,7 +137,8 @@ let save = function() {
   }
   
   //send to server
-  axios.post("/save", {id: window.currentId, title: title, date: date, fob: fobValue, deposit: depositValue, notes: notes, notDate: notDate}).then((response) => {
+  console.log(title)
+  axios.post("/save", {id: window.currentId, title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
     // Go back
     view.router.back()
   })
