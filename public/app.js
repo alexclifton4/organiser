@@ -67,9 +67,7 @@ let loadPage = function(page) {
         document.getElementsByName("entryDate")[0].value = dateFormat(response.data.date, "isoDate")
         document.getElementsByName("entryNotes")[0].innerHTML = response.data.notes
         document.getElementsByName("entryPhone")[0].value = response.data.phone
-        if (response.data.cost) {
-            document.getElementsByName("entryCost")[0].value =  parseFloat(response.data.cost.substr(1))
-        }
+        document.getElementsByName("entryCost")[0].value =  response.data.cost
         document.getElementsByName("entryPayment")[0].value = response.data.payment
         document.getElementsByName("entryCompany")[0].value = response.data.company
         if (response.data.notificationdate) {
