@@ -87,7 +87,7 @@ app.get('/all.html', (req, res) => {
 //send all entries
 app.get('/all', (req, res) => {
   let db = database.connect()
-  let sql = "SELECT rowid AS id, title, date FROM entries ORDER BY date"
+  let sql = "SELECT rowid AS id, title, date, company FROM entries ORDER BY date"
   db.query(sql, (err, data) => {
     if (err) throw err;
     res.send(data.rows)

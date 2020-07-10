@@ -45,7 +45,7 @@ let loadPage = function(page) {
                 date = "&nbsp"
             }
             html += `<li><a href="/entry/${entry.id}/" class="item-link item-content">` + 
-              `<div class="item-inner"><div class="item-title-row"><div class="item-title">${entry.title}\</div></div>` +
+              `<div class="item-inner"><div class="item-title-row"><div class="item-title">${entry.title} <span style="color:grey"> - ${entry.company}</span>\</div></div>` +
               `<div class="item-subtitle">${date}\</div></div</a></li>`
           }
           document.getElementById("entries").innerHTML = html
