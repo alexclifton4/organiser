@@ -5,11 +5,11 @@
 const express = require('express');
 const app = express();
 const fs = require("fs");
-const axios = require("axios")
 const dateFormat = require("dateformat")
 const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS
 const cookieParser = require("cookie-parser")
 const hash = require("password-hash")
+const gmailSend = require("gmail-send")
 
 const database = require('./db.js');
 
@@ -20,7 +20,7 @@ const database = require('./db.js');
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
-app.use(redirectToHTTPS())
+app.use(redirectToHTTPS([/localhost:8080/]))
 app.use(cookieParser())
 
 // Cron for sending emails
@@ -29,8 +29,8 @@ app.post("/cron", (req,res) => {
   let now = new Date().getTime()
   // get entries
   let db = database.connect()
-  let sql = "SELECT rowid, * FROM entries WHERE notificationDate < $1 AND notificationSent = 0"
-  db.query(sql, [now], (err, data) => {
+  let sql = "SELECT rowid, * FROM entries WHERE notificationSent = 0"
+  db.query(sql, (err, data) => {
     if (err) throw err
     // Send notifications if there is data
     if (data.rows.length > 0) {
@@ -146,19 +146,21 @@ app.post('/delete', (req, res) => {
 
 // Actually sends the notification email
 let sendNotification = function(entries) {
-  let data = {
-    fromAddress: "reminder@mail.alexclifton.co.uk",
-    toAddress: process.env.NOTIFICATIONADDRESS,
-    subject: "Organiser Reminders - " + process.env.TITLE,
-    mailFormat: "html",
-    content: generateEmail(entries),
-    key: process.env.EMAILKEY
-  }
-  
-  axios.post("https://emailrelay.glitch.me/send", data).then((response) => {
-    console.log("EMAIL SENT")
-    console.log(response.data)
+  let email = gmailSend({
+    user: process.env.EMAIL_FROM,
+    pass: process.env.EMAIL_PASSWORD,
+    to: process.env.EMAIL_TO,
+    subject: "Organiser Reminders - " + process.env.TITLE
   })
+  
+  // Generate the content
+  let content = generateEmail(entries)
+  
+  if (content != -1) {
+      email({html: generateEmail(entries)}, (err) => {
+      if (err) throw err;
+  })
+  }
 }
 
 // Sets the notification flag to sent
@@ -173,21 +175,29 @@ let markAsSent = function(ids) {
 
 // Makes a string for sending data in email
 let generateEmail = function(data) {
-  let email = `<h1>Organiser reminders - ${process.env.TITLE}</h1>`
-  email += `<p>Upcoming reminders: <b>${data.length}</b></p>`
+  let email;
   
   let ids = []
   
   for (let i = 0; i < data.length; i++){
-    email += `<hr><p><b>Title:</b>${data[i].title}</p>`
-    email += `<p><b>Date:</b>${dateFormat(data[i].date, "dd/mm/yyyy")}</o>`
-    email += `<p><b>Notes:</b>${data[i].notes}</p>`
-    ids[i] = data[i].rowid
+    // Make sure the date is in the past
+    if (new Date(data[i].notificationdate).getTime() < new Date().getTime()){
+        email += `<hr><p><b>Title:</b>${data[i].title}</p>`
+        email += `<p><b>Date:</b>${dateFormat(data[i].date, "dd/mm/yyyy")}</o>`
+        email += `<p><b>Notes:</b>${data[i].notes}</p>`
+        ids.push(data[i].rowid)
+    }
   }
   
-  markAsSent(ids)
+  // Add header to email
+  email = `<h1>Organiser reminders - ${process.env.TITLE}</h1><p>Upcoming reminders: <b>${ids.length}</b></p>` + email
   
-  return email
+  if (ids.length != 0) {
+    markAsSent(ids)
+    return email
+  }
+  
+  return -1
 }
 
 // listen for requests :)
