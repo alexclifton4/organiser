@@ -157,7 +157,7 @@ let sendNotification = function(entries) {
   let content = generateEmail(entries)
   
   if (content != -1) {
-      email({html: generateEmail(entries)}, (err) => {
+      email({html: content}, (err) => {
       if (err) throw err;
   })
   }
@@ -175,7 +175,7 @@ let markAsSent = function(ids) {
 
 // Makes a string for sending data in email
 let generateEmail = function(data) {
-  let email;
+  let email = "";
   
   let ids = []
   
