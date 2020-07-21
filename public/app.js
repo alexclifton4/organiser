@@ -23,7 +23,12 @@ var view = app.views.create('.view-main');
 
 //main load
 let load = function() {
-   view.router.navigate("/all/")
+   let id = new URLSearchParams(window.location.search).get("id")
+   if (id) {
+      view.router.navigate("/entry/" + id + "/")
+   } else {
+      view.router.navigate("/all/")
+   }
 }
 
 //when an individual page loads

@@ -157,9 +157,9 @@ let sendNotification = function(entries) {
   let content = generateEmail(entries)
   
   if (content != -1) {
-      email({html: content}, (err) => {
+    email({html: content}, (err) => {
       if (err) throw err;
-  })
+    })
   }
 }
 
@@ -185,6 +185,7 @@ let generateEmail = function(data) {
         email += `<hr><p><b>Title:</b>${data[i].title}</p>`
         email += `<p><b>Date:</b>${dateFormat(data[i].date, "dd/mm/yyyy")}</o>`
         email += `<p><b>Notes:</b>${data[i].notes}</p>`
+        email += `<p><a href="https://organiser${process.env.TITLE}.herokuapp.com/?id=${data[i].rowid}">View in organiser</a></p>`
         ids.push(data[i].rowid)
     }
   }
