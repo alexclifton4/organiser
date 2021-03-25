@@ -164,6 +164,7 @@ let sendNotification = function(entries, res) {
   email({html: content}, (err) => {
     if (err) {
       console.log(err)
+      res.status(500)
       res.send("Email failed: " + err)
     } else {
       res.send("Email sent")
