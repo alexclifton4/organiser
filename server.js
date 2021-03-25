@@ -20,22 +20,26 @@ const database = require('./db.js');
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
-app.use(redirectToHTTPS([/localhost:8080/]))
+app.use(redirectToHTTPS([/localhost:(\d{4})/]))
 app.use(cookieParser())
 
 // Cron for sending emails
 app.post("/cron", (req,res) => {
   // get current date
   let now = new Date().getTime()
-  // get entries
+  // get entries that havent been sent yet
   let db = database.connect()
-  let sql = "SELECT rowid, * FROM entries WHERE notificationSent = 0"
+  let sql = "SELECT rowid, * FROM entries WHERE notificationSent = 0 AND notificationdate != ''"
   db.query(sql, (err, data) => {
     if (err) throw err
+    // Filter out rows that have a notification date in the future
+    data = data.rows.filter(row => 
+      new Date(row.notificationdate).getTime() < new Date().getTime()
+    )
+
     // Send notifications if there is data
-    if (data.rows.length > 0) {
-      sendNotification(data.rows)
-      res.send("started")
+    if (data.length > 0) {
+      sendNotification(data, res)
     } else {
       res.send("None to send")
     }
@@ -145,7 +149,7 @@ app.post('/delete', (req, res) => {
 })
 
 // Actually sends the notification email
-let sendNotification = function(entries) {
+let sendNotification = function(entries, res) {
   let email = gmailSend({
     user: process.env.EMAIL_FROM,
     pass: process.env.EMAIL_PASSWORD,
@@ -154,13 +158,18 @@ let sendNotification = function(entries) {
   })
   
   // Generate the content
-  let content = generateEmail(entries)
+  let generatedEmail = generateEmail(entries)
+  let content = generatedEmail.content
   
-  if (content != -1) {
-    email({html: content}, (err) => {
-      if (err) throw err;
-    })
-  }
+  email({html: content}, (err) => {
+    if (err) {
+      console.log(err)
+      res.send("Email failed: " + err)
+    } else {
+      res.send("Email sent")
+      markAsSent(generatedEmail.ids)
+    }
+  })
 }
 
 // Sets the notification flag to sent
@@ -193,12 +202,10 @@ let generateEmail = function(data) {
   // Add header to email
   email = `<h1>Organiser reminders - ${process.env.TITLE}</h1><p>Upcoming reminders: <b>${ids.length}</b></p>` + email
   
-  if (ids.length != 0) {
-    markAsSent(ids)
-    return email
+  return {
+    content: email,
+    ids: ids
   }
-  
-  return -1
 }
 
 // listen for requests :)
