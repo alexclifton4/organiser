@@ -7,9 +7,11 @@ const app = express();
 const fs = require("fs");
 const dateFormat = require("dateformat")
 const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS
-const cookieParser = require("cookie-parser")
-const hash = require("password-hash")
 const gmailSend = require("gmail-send")
+const session = require("express-session")
+const redisStore = require('connect-redis')(session)
+const redis = require("ioredis")
+const axios = require("axios")
 
 const database = require('./db.js');
 
@@ -21,7 +23,15 @@ app.use(express.static('public'));
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
 app.use(redirectToHTTPS([/localhost:(\d{4})/]))
-app.use(cookieParser())
+
+// Use redis for client sessions
+let redisClient = new redis(process.env.REDIS_URL)
+app.use(session({
+  store: new redisStore({client: redisClient, prefix: "organiser:"}),
+  secret: "something random",
+  saveUninitialized: false,
+  resave: false
+}))
 
 // Cron for sending emails
 app.post("/cron", (req,res) => {
@@ -47,25 +57,30 @@ app.post("/cron", (req,res) => {
   })
 })
 
-app.post('/login', (req, res) => {
-  // Check the password
-  if (hash.verify(req.body.password, process.env.PASSWORD)) {
-    res.cookie("token", process.env.ACCESS_TOKEN, {maxAge: 2147483647})
+// Callback url from SSO
+app.get("/sso", (req, res) => {
+  let url = new URL("https://auth.alexclifton.co.uk/verifyToken")
+  url.searchParams.append("token", req.query.token)
+  url.searchParams.append("apikey", process.env.SSO_KEY)
+  axios.get(url.href).then(response => {
+    if (response.data.error) {
+      res.send("<h1>Auth error</h1><br>" + response.data.error)
+      return
+    }
+    req.session.user = {
+      id: response.data.id,
+      name: response.data.name 
+    }
     res.redirect("/")
-  } else {
-    res.send("Incorrect Password")
-  }
+  })
 })
 
-app.all('*', (req, res, next) => {
-  // Check if token is valid
-  if (req.cookies.token == process.env.ACCESS_TOKEN) {
+// On all requests, verify user is logged in
+app.all("*", (req, res, next) => {
+  if (req.session.user) {
     next()
   } else {
-    let file = fs.readFileSync(__dirname + '/views/login.html').toString()
-    file = file.replace(/TITLE/g, process.env.TITLE)
-    res.write(file);
-    res.end()
+    res.redirect("https://auth.alexclifton.co.uk/login?app=" + process.env.SSO_APP)
   }
 })
 
