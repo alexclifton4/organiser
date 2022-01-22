@@ -71,7 +71,13 @@ app.get("/sso", (req, res) => {
       id: response.data.id,
       name: response.data.name 
     }
-    res.redirect("/")
+
+    // Redirect, depending on state
+    if (req.query.state) {
+      res.redirect("/?id=" + req.query.state)
+    } else {
+      res.redirect("/")
+    }
   })
 })
 
@@ -80,7 +86,16 @@ app.all("*", (req, res, next) => {
   if (req.session.user) {
     next()
   } else {
-    res.redirect("https://auth.alexclifton.co.uk/login?app=" + process.env.SSO_APP)
+    // Redirect to SSO
+    let url = new URL("https://auth.alexclifton.co.uk/login")
+    url.searchParams.append("app", process.env.SSO_APP)
+
+    // Check if the request was for a specific entry
+    if (req.query.id) {
+      url.searchParams.append("state", req.query.id)
+    }
+
+    res.redirect(url)
   }
 })
 
