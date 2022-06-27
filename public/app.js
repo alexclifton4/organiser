@@ -78,6 +78,10 @@ let loadPage = function(page) {
         if (response.data.notificationdate) {
           document.getElementsByName("entryNotDate")[0].value = dateFormat(response.data.notificationdate, "isoDate")
         }
+        if (response.data.notificationdate2) {
+          document.getElementsByName("entryNotDate2")[0].value = dateFormat(response.data.notificationdate2, "isoDate")
+        }
+
         window.currentId = response.data.id
         
         //force textarea to resize
@@ -95,6 +99,7 @@ let addNew = function() {
   let date = document.getElementsByName("date")[0].value;
   let notes = document.getElementsByName("notes")[0].value;
   let notDate = document.getElementsByName("notDate")[0].value;
+  let notDate2 = document.getElementsByName("notDate2")[0].value;
   let phone = document.getElementsByName("phone")[0].value;
   let cost = document.getElementsByName("cost")[0].value;
   let payment = document.getElementsByName("payment")[0].value;
@@ -107,7 +112,7 @@ let addNew = function() {
   }
   
   //send to server
-  axios.post("/addNew", {title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
+  axios.post("/addNew", {title: title, date: date, notes: notes, notDate: notDate, notDate2: notDate2, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
     // Refresh the page
     loadPage({path: "/all/"})
     
@@ -129,6 +134,7 @@ let save = function() {
   let date = document.getElementsByName("entryDate")[0].value;
   let notes = document.getElementsByName("entryNotes")[0].value;
   let notDate = document.getElementsByName("entryNotDate")[0].value;
+  let notDate2 = document.getElementsByName("entryNotDate2")[0].value;
   let phone = document.getElementsByName("entryPhone")[0].value;
   let cost = document.getElementsByName("entryCost")[0].value;
   let payment = document.getElementsByName("entryPayment")[0].value;
@@ -142,7 +148,7 @@ let save = function() {
   
   //send to server
   console.log(title)
-  axios.post("/save", {id: window.currentId, title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
+  axios.post("/save", {id: window.currentId, title: title, date: date, notes: notes, notDate: notDate, notDate2: notDate2, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
     // Go back
     view.router.back()
   })

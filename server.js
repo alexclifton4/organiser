@@ -39,7 +39,7 @@ app.post("/cron", (req,res) => {
   let now = new Date().getTime()
   // get entries that havent been sent yet
   let db = database.connect()
-  let sql = "SELECT rowid, * FROM entries WHERE notificationSent = 0 AND notificationdate != ''"
+let sql = "SELECT rowid, * FROM entries WHERE (notificationSent = 0 AND notificationdate != '') OR (notificationSent = 1 AND notificationdate2 != '')"
   db.query(sql, (err, data) => {
     if (err) throw err
     // Filter out rows that have a notification date in the future
@@ -145,8 +145,8 @@ app.get('/entry', (req, res) => {
 app.post('/addNew', (req, res) => {
   //insert into db
   let db = database.connect()
-  let sql = "INSERT INTO entries (title, date, notes, phone, cost, payment, company, notificationDate, notificationSent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 0)";
-  db.query(sql, [req.body.title, req.body.date, req.body.notes, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notDate], (err) => {
+  let sql = "INSERT INTO entries (title, date, notes, phone, cost, payment, company, notificationDate, notificationDate2, notificationSent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0)";
+  db.query(sql, [req.body.title, req.body.date, req.body.notes, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notDate, req.body.notDate2], (err) => {
     if (err) throw err
     res.send("done")
     db.end()
@@ -158,8 +158,8 @@ app.post('/save', (req, res) => {
   //update db
   let db = database.connect()
   //title: title, date: date, notes: notes, notDate: notDate, phone: phone, cost: cost, payment: payment, company: company
-  let sql = "UPDATE entries SET title = $1, date = $2, phone = $3, cost = $4, payment = $5, company = $6, notes = $7, notificationDate = $8, notificationSent = 0 WHERE rowid = $9"
-  db.query(sql, [req.body.title, req.body.date, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notes, req.body.notDate, req.body.id], (err) => {
+  let sql = "UPDATE entries SET title = $1, date = $2, phone = $3, cost = $4, payment = $5, company = $6, notes = $7, notificationDate = $8, notificationDate2 = $9, notificationSent = 0 WHERE rowid = $10"
+  db.query(sql, [req.body.title, req.body.date, req.body.phone, req.body.cost, req.body.payment, req.body.company, req.body.notes, req.body.notDate, req.body.notDate2, req.body.id], (err) => {
     if (err) throw err
     res.send("done");
     db.end()
@@ -206,7 +206,7 @@ let sendNotification = function(entries, res) {
 // Sets the notification flag to sent
 let markAsSent = function(ids) {
   let db = database.connect()
-  let sql = "UPDATE entries SET notificationSent = 1 WHERE rowid IN (" + ids.join(",") + ")"
+  let sql = "UPDATE entries SET notificationSent = notificationSent + 1 WHERE rowid IN (" + ids.join(",") + ")"
   db.query(sql, [], (err) => {
     if (err) throw err
     db.end()
@@ -222,9 +222,10 @@ let generateEmail = function(data) {
   for (let i = 0; i < data.length; i++){
     // Make sure the date is in the past
     if (new Date(data[i].notificationdate).getTime() < new Date().getTime()){
-        email += `<hr><p><b>Title:</b>${data[i].title}</p>`
-        email += `<p><b>Date:</b>${dateFormat(data[i].date, "dd/mm/yyyy")}</o>`
-        email += `<p><b>Notes:</b>${data[i].notes}</p>`
+        email += `<hr><p><b>Title: </b>${data[i].title}</p>`
+        email += `<p><b>Reminder: </b>${data[i].notificationsent?"Second":"First"}</p>`
+        email += `<p><b>Date: </b>${dateFormat(data[i].date, "dd/mm/yyyy")}</p>`
+        email += `<p><b>Notes: </b>${data[i].notes}</p>`
         email += `<p><a href="https://organiser${process.env.TITLE}.herokuapp.com/?id=${data[i].rowid}">View in organiser</a></p>`
         ids.push(data[i].rowid)
     }
