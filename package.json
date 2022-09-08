@@ -14,7 +14,6 @@
     "connect-redis": "^6.0.0",
     "dateformat": "^3.0.3",
     "express": "^4.17.1",
-    "express-http-to-https": "^1.1.4",
     "express-session": "^1.17.2",
     "gmail-send": "^1.8.10",
     "ioredis": "^4.27.6",

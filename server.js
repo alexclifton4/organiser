@@ -6,7 +6,6 @@ const express = require('express');
 const app = express();
 const fs = require("fs");
 const dateFormat = require("dateformat")
-const redirectToHTTPS = require("express-http-to-https").redirectToHTTPS
 const gmailSend = require("gmail-send")
 const session = require("express-session")
 const redisStore = require('connect-redis')(session)
@@ -19,10 +18,9 @@ const database = require('./db.js');
 // but feel free to use whatever libs or frameworks you'd like through `package.json`.
 
 // http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
-app.use(redirectToHTTPS([/localhost:(\d{4})/]))
 
 // Use redis for client sessions
 let redisClient = new redis(process.env.REDIS_URL)
