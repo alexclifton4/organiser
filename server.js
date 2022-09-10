@@ -224,7 +224,7 @@ let generateEmail = function(data) {
         email += `<p><b>Reminder: </b>${data[i].notificationsent?"Second":"First"}</p>`
         email += `<p><b>Date: </b>${dateFormat(data[i].date, "dd/mm/yyyy")}</p>`
         email += `<p><b>Notes: </b>${data[i].notes}</p>`
-        email += `<p><a href="https://organiser${process.env.TITLE}.herokuapp.com/?id=${data[i].rowid}">View in organiser</a></p>`
+        email += `<p><a href="https://organiser${process.env.TITLE}.alexclifton.co.uk/?id=${data[i].rowid}">View in organiser</a></p>`
         ids.push(data[i].rowid)
     }
   }
