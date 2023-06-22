@@ -17,7 +17,7 @@
     "express-session": "^1.17.2",
     "gmail-send": "^1.8.10",
     "ioredis": "^4.27.6",
-    "pg": "^8.2.1"
+    "pg": "^8.11.0"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-express"
