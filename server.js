@@ -6,11 +6,11 @@ const express = require('express');
 const app = express();
 const fs = require("fs");
 const dateFormat = require("dateformat")
-const gmailSend = require("gmail-send")
 const session = require("express-session")
 const redisStore = require('connect-redis')(session)
 const redis = require("ioredis")
 const axios = require("axios")
+const sendgrid = require("@sendgrid/mail")
 
 const database = require('./db.js');
 
@@ -178,27 +178,29 @@ app.post('/delete', (req, res) => {
 
 // Actually sends the notification email
 let sendNotification = function(entries, res) {
-  let email = gmailSend({
-    user: process.env.EMAIL_FROM,
-    pass: process.env.EMAIL_PASSWORD,
-    to: process.env.EMAIL_TO,
-    subject: "Organiser Reminders - " + process.env.TITLE
-  })
-  
+  sendgrid.setApiKey(process.env.SENDGRID_KEY)
+
   // Generate the content
   let generatedEmail = generateEmail(entries)
   let content = generatedEmail.content
-  
-  email({html: content}, (err) => {
-    if (err) {
+
+  let message = {
+    to: process.env.EMAIL_TO,
+    from: process.env.EMAIL_FROM,
+    subject: "Organiser Reminders - " + process.env.TITLE,
+    html: content
+  }
+
+  sendgrid.send(message)
+    .then(() => {
+      res.send("Email sent")
+      markAsSent(generatedEmail.ids)
+    })
+    .catch((err) => {
       console.log(err)
       res.status(500)
       res.send("Email failed: " + err)
-    } else {
-      res.send("Email sent")
-      markAsSent(generatedEmail.ids)
-    }
-  })
+    })
 }
 
 // Sets the notification flag to sent

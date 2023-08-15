@@ -10,12 +10,12 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "axios": "^0.21.2",
     "connect-redis": "^6.0.0",
     "dateformat": "^3.0.3",
     "express": "^4.18.2",
     "express-session": "^1.17.2",
-    "gmail-send": "^1.8.10",
     "ioredis": "^4.27.6",
     "pg": "^8.11.0"
   },
