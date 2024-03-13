@@ -147,10 +147,10 @@ let save = function() {
   }
   
   //send to server
-  console.log(title)
   axios.post("/save", {id: window.currentId, title: title, date: date, notes: notes, notDate: notDate, notDate2: notDate2, phone: phone, cost: cost, payment: payment, company: company}).then((response) => {
     // Go back
     view.router.back()
+    alert("Entry saved")
   })
 }
 
