@@ -11,6 +11,7 @@ const redisStore = require('connect-redis')(session)
 const redis = require("ioredis")
 const axios = require("axios")
 const sendgrid = require("@sendgrid/mail")
+require("dotenv").config()
 
 const database = require('./db.js');
 
