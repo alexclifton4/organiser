@@ -1,0 +1,50 @@
+name: Push to ECR and deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build and push to ECR
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 020353163849.dkr.ecr.eu-west-2.amazonaws.com
+        docker build -t organiser .
+        docker tag organiser:latest 020353163849.dkr.ecr.eu-west-2.amazonaws.com/organiser:latest
+        docker push 020353163849.dkr.ecr.eu-west-2.amazonaws.com/organiser:latest
+
+    - name: Deploy on Portainer - Flat
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        curl -X POST -f \
+        -H 'Content-Type: application/json' \
+        --data '{"name": "organiserFlat", "DEPLOY_KEY": "${{ secrets.DEPLOY_KEY }}"}' \
+        https://api.alexclifton.co.uk/deploy
+
+    - name: Deploy on Portainer - Home
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        curl -X POST -f \
+        -H 'Content-Type: application/json' \
+        --data '{"name": "organiserHome", "DEPLOY_KEY": "${{ secrets.DEPLOY_KEY }}"}' \
+        https://api.alexclifton.co.uk/deploy
+
+    - name: Deploy on Portainer - Work
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        curl -X POST -f \
+        -H 'Content-Type: application/json' \
+        --data '{"name": "organiserWork", "DEPLOY_KEY": "${{ secrets.DEPLOY_KEY }}"}' \
+        https://api.alexclifton.co.uk/deploy
