@@ -10,7 +10,7 @@ const session = require("express-session")
 const redisStore = require('connect-redis')(session)
 const redis = require("ioredis")
 const axios = require("axios")
-const sendgrid = require("@sendgrid/mail")
+const nodemailer = require("nodemailer")
 require("dotenv").config()
 
 const database = require('./db.js');
@@ -179,7 +179,16 @@ app.post('/delete', (req, res) => {
 
 // Actually sends the notification email
 let sendNotification = function(entries, res) {
-  sendgrid.setApiKey(process.env.SENDGRID_KEY)
+  // Log in with SMTP
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  })
 
   // Generate the content
   let generatedEmail = generateEmail(entries)
@@ -192,7 +201,7 @@ let sendNotification = function(entries, res) {
     html: content
   }
 
-  sendgrid.send(message)
+  transporter.sendMail(message)
     .then(() => {
       res.send("Email sent")
       markAsSent(generatedEmail.ids)
