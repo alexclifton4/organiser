@@ -34,11 +34,12 @@ app.use(session({
 
 // Cron for sending emails
 app.post("/cron", (req,res) => {
+  console.log("Running CRON job")
   // get current date
   let now = new Date().getTime()
   // get entries that havent been sent yet
   let db = database.connect()
-let sql = "SELECT rowid, * FROM entries WHERE (notificationSent = 0 AND notificationdate != '') OR (notificationSent = 1 AND notificationdate2 != '')"
+  let sql = "SELECT rowid, * FROM entries WHERE (notificationSent = 0 AND notificationdate != '') OR (notificationSent = 1 AND notificationdate2 != '')"
   db.query(sql, (err, data) => {
     if (err) throw err
     // Filter out rows that have a notification date in the future
@@ -48,8 +49,10 @@ let sql = "SELECT rowid, * FROM entries WHERE (notificationSent = 0 AND notifica
 
     // Send notifications if there is data
     if (data.length > 0) {
+      console.log("Sending notification email")
       sendNotification(data, res)
     } else {
+      console.log("No notifications to send")
       res.send("None to send")
     }
     db.end()
@@ -205,6 +208,7 @@ let sendNotification = function(entries, res) {
     .then(() => {
       res.send("Email sent")
       markAsSent(generatedEmail.ids)
+      console.log("Sent email for " + entries.length + " entries")
     })
     .catch((err) => {
       console.log(err)
