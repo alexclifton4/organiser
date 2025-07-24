@@ -48,3 +48,12 @@ jobs:
         -H 'Content-Type: application/json' \
         --data '{"name": "organiserWork", "DEPLOY_KEY": "${{ secrets.DEPLOY_KEY }}"}' \
         https://api.alexclifton.co.uk/deploy
+
+    - name: Deploy on Portainer - Test
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        curl -X POST -f \
+        -H 'Content-Type: application/json' \
+        --data '{"name": "organiserTest", "DEPLOY_KEY": "${{ secrets.DEPLOY_KEY }}"}' \
+        https://api.alexclifton.co.uk/deploy
