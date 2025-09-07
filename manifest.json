@@ -1,0 +1,12 @@
+{
+  "name": "$",
+  "scope": "https://organiser$.alexclifton.co.uk/",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable any"
+    }
+  ]
+}

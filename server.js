@@ -59,6 +59,16 @@ app.post("/cron", (req,res) => {
   })
 })
 
+// Return correct manifest
+app.get("/manifest.json", (req, res) => {
+  // Read the file
+  let file = fs.readFileSync("manifest.json").toString()
+
+  // Send, with values replaced
+  res.setHeader('content-type', 'application/json');
+  res.send(file.replaceAll("$", process.env.TITLE))
+})
+
 // Callback url from SSO
 app.get("/sso", (req, res) => {
   let url = new URL("https://auth.alexclifton.co.uk/verifyToken")
